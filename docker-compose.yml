@@ -1,0 +1,43 @@
+version: "3.6"
+
+services:
+  arrowd:
+    image: arrowchain/arrowd:1.2.2
+    container_name: arrowd
+    ports:
+      - 7654:7654
+    volumes:
+      - ./arrow-data:/root/.arrow
+      - ./arrow-conf:/arrow-conf
+    networks:
+      arw-net:
+        ipv4_address: 172.16.110.100
+
+  lightwalletd:
+    image: arrowchain/lightwalletd:latest
+    container_name: lightwalletd
+    restart: unless-stopped
+    depends_on:
+      - arrowd
+    ports:
+      - 443:443
+    environment:
+      - CA_ORG=Arrowchain
+      - CA_ADDR=wallet.arrowchain.net
+      - BIND_ADDR=0.0.0.0:443
+      - RPC_ADDR=172.16.110.100:6543
+      - RPC_USER=asdfasdf
+      - RPC_PASS=9rovMJYfWX
+    networks:
+      arw-net:
+        ipv4_address: 172.16.110.101
+
+
+networks:
+  arw-net:
+    name: arw-net
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.110.0/24
